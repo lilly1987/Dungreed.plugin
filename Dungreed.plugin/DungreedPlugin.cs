@@ -78,12 +78,27 @@ namespace Dungreed.plugin
             harmony = Harmony.CreateAndPatchAll(typeof(DungreedPlugin));
         }
 
+        bool hpMaxSet;
+        bool dashMaxSet;
+
         public void Update()
         {
             if (ShowCounter.Value.IsUp())// 단축키가 일치할때
             {
                 isGUIOn.Value = !isGUIOn.Value;// 보이거나 안보이게. 이런 배열이였네 지웠음
                 //MyLog.LogMessage("IsUp", ShowCounter.Value.MainKey);
+            }
+            if (player != null)
+            {
+                if (hpMaxSet)
+                {
+                    status.hp = status.maxHP;
+                }
+                            
+                if (dashMaxSet)
+                {
+                    controller2D.ramainingDashCount = controller2D.maxDashCount;
+                }
             }
         }
 
@@ -122,8 +137,16 @@ namespace Dungreed.plugin
                 {
                     if (GUILayout.Button($"EXP {player.EXP}+10")) { player.AddEXP(10); }
                     if (GUILayout.Button($"Money {player.Money}+10000")) { player.AddMoney(10000, true); }
+                    if (GUILayout.Button($"Auto hp Set Max {hpMaxSet}")) { hpMaxSet=!hpMaxSet; }
                     if (GUILayout.Button($"hp {status.hp}={status.maxHP}")) { status.hp = status.maxHP; }
                     if (GUILayout.Button($"lockHP { status.lockHP}")) { status.lockHP = !status.lockHP; }
+                    if (GUILayout.Button($"Auto Dash Set Max {dashMaxSet}")) { dashMaxSet = !dashMaxSet;  }
+                    GUI.enabled = false;
+                    if (GUILayout.Button($"ramainingDashCount {controller2D.ramainingDashCount}")) {  }
+                    if (GUILayout.Button($"maxDashCount {controller2D.maxDashCount}")) { hpMaxSet=!hpMaxSet; }
+                    if (GUILayout.Button($"currentJumpCount {controller2D.currentJumpCount}")) { hpMaxSet=!hpMaxSet; }
+                    if (GUILayout.Button($"jumpCount {controller2D.jumpCount}")) { hpMaxSet=!hpMaxSet; }
+                    GUI.enabled = true;
                     if (GUILayout.Button($"abilityPoint { ability.abilityPoint}+100")) { ability.abilityPoint+=100; }
 
                     GUILayout.Label($"coinBonus : {player.coinBonus}");
@@ -167,6 +190,7 @@ namespace Dungreed.plugin
 
         public static Player player = null;
         public static Status status = null;
+        public static CharacterController2D controller2D = null;
         public static PlayerAbility ability = null;
 
         // 무의미
@@ -187,6 +211,7 @@ namespace Dungreed.plugin
             Debug.Log("CreatePlayer");
             DungreedPlugin.player = ___currentPlayer;
             status = player._creature.status;
+            controller2D = player._creature._controller2D;
             ability = player._ability;
             //return true;
         }
