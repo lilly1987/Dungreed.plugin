@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dungreed.plugin", "Dungreed.plugin\Dungreed.plugin.csproj", "{91AAA3D9-9D77-4C5C-927B-8F9DBB71E68D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91AAA3D9-9D77-4C5C-927B-8F9DBB71E68D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91AAA3D9-9D77-4C5C-927B-8F9DBB71E68D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91AAA3D9-9D77-4C5C-927B-8F9DBB71E68D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91AAA3D9-9D77-4C5C-927B-8F9DBB71E68D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2EB24C44-843D-4B93-8D6C-38C2CA760ADC}
+	EndGlobalSection
+EndGlobal
