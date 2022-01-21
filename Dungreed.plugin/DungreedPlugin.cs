@@ -6,15 +6,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Dungreed.plugin
 {
+    class MyAttribute
+    {
+        public const string PLAGIN_NAME = "Dungreed";
+        public const string PLAGIN_VERSION = "22.01";
+        public const string PLAGIN_FULL_NAME = "Lilly.Dungreed.Plugin";
+    }
+
+    [BepInPlugin(MyAttribute.PLAGIN_FULL_NAME, MyAttribute.PLAGIN_NAME, MyAttribute.PLAGIN_VERSION)]// 버전 규칙 잇음. 반드시 2~4개의 숫자구성으로 해야함. 미준수시 못읽어들임
+    [BepInProcess("Dungreed.exe")]
     public class DungreedPlugin : BaseUnityPlugin
     {
-        Harmony harmony;
-        static ManualLogSource logger;
+        public Harmony harmony = null;
+        public static ManualLogSource logger;
 
         private ConfigEntry<bool> isGUIOn;
         private ConfigEntry<bool> isOpen;
@@ -24,10 +32,11 @@ namespace Dungreed.plugin
         public string FullName = "DungreedPlugin";
         public string ShortName = "DP";
 
-        private int windowId;
+        public int windowId = 984;
         public Rect WindowRect { get; private set; }
-
-        private Vector2 scrollPosition;
+        GUILayoutOption h;
+        GUILayoutOption w;
+        public Vector2 scrollPosition;
 
         public void Awake()
         {
@@ -38,12 +47,35 @@ namespace Dungreed.plugin
 
             isGUIOn = Config.Bind("GUI", "isGUIOn", true);
             isOpen = Config.Bind("GUI", "isOpen", true);
+            isOpen.SettingChanged += IsOpen_SettingChanged;
+            IsOpen_SettingChanged(null, null);
+            ;
+
             ShowCounter = Config.Bind("GUI", "isGUIOnKey", new KeyboardShortcut(KeyCode.Keypad0));// 이건 단축키
+        }
+
+        private void IsOpen_SettingChanged(object sender, EventArgs e)
+        {
+            logger.LogInfo($"IsOpen_SettingChanged {isOpen.Value} , {isGUIOn.Value} ");
+            if (isOpen.Value)
+            {
+                h = GUILayout.Height(800);
+                w = GUILayout.Width(200);
+                windowName = FullName;
+            }
+            else
+            {
+                h = GUILayout.Height(40);
+                w = GUILayout.Height(60);
+                windowName = ShortName;
+            }
         }
 
         public void OnEnable()
         {
-            harmony.PatchAll(typeof(DungreedPlugin));
+            Logger.LogWarning("OnEnable");
+            Debug.LogWarning("OnEnable");
+            harmony = Harmony.CreateAndPatchAll(typeof(DungreedPlugin));
         }
 
         public void Update()
@@ -60,7 +92,7 @@ namespace Dungreed.plugin
             if (!isGUIOn.Value)
                 return;
 
-            WindowRect = GUILayout.Window(windowId, WindowRect, WindowFunction, "DungreedPlugin");
+            WindowRect = GUILayout.Window(windowId, WindowRect, WindowFunction, "DungreedPlugin", w, h);
         }
 
         public virtual void WindowFunction(int id)
@@ -86,8 +118,39 @@ namespace Dungreed.plugin
             else
             {
                 scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+                if (player != null)
+                {
+                    if (GUILayout.Button($"EXP {player.EXP}+10")) { player.AddEXP(10); }
+                    if (GUILayout.Button($"Money {player.Money}+10000")) { player.AddMoney(10000, true); }
+                    if (GUILayout.Button($"hp {status.hp}={status.maxHP}")) { status.hp = status.maxHP; }
+                    if (GUILayout.Button($"lockHP { status.lockHP}")) { status.lockHP = !status.lockHP; }
+                    if (GUILayout.Button($"abilityPoint { ability.abilityPoint}+100")) { ability.abilityPoint+=100; }
 
-                if (GUILayout.Button("Money+10000")) { }
+                    GUILayout.Label($"coinBonus : {player.coinBonus}");
+                    GUILayout.Label($"killEnemyCount : {player.killEnemyCount}");
+                    GUILayout.Label($"killExp : {player.killExp}");
+                    GUILayout.Label($"life : {player.life}");
+                    GUILayout.Label($"minotaurLife : {player.minotaurLife}");
+                    GUILayout.Label($"satiety : {player.satiety}");
+                    GUILayout.Label($"satietyDiscount : {player.satietyDiscount}");
+                    GUILayout.Label($"Soul : {player.Soul}");                                       
+                    GUILayout.Label($"bonusHPRatio : {status.bonusHPRatio}");                    
+                    GUILayout.Label($"shield : {status.shield}");
+                    GUILayout.Label($"maxShield : {status.maxShield}");
+                    GUILayout.Label($"power : {status.power}");
+                    GUILayout.Label($"regeneration : {status.regeneration}");
+                    GUILayout.Label($"critical : {status.critical}");
+                    GUILayout.Label($"offense : {status.offense}");
+                    GUILayout.Label($"maxOffense : {status.maxOffense}");
+                    GUILayout.Label($"defense : {status.defense}");
+                    GUILayout.Label($"superShield : {status.superShield}");
+                    GUILayout.Label($"tempSuperShield : {status.tempSuperShield}");
+                    GUILayout.Label($"vitality : {status.vitality}");
+                }
+                else
+                {
+                    GUILayout.Label($"No player");
+                }
 
                 GUILayout.EndScrollView();
             }
@@ -97,17 +160,35 @@ namespace Dungreed.plugin
 
         public void OnDisable()
         {
-            harmony.UnpatchSelf();
+            Logger.LogWarning("OnDisable");
+            Debug.LogWarning("SetPlayer");
+            harmony?.UnpatchSelf();
         }
 
-        public static Player player;
+        public static Player player = null;
+        public static Status status = null;
+        public static PlayerAbility ability = null;
 
-        [HarmonyPrefix, HarmonyPatch(typeof(Player_Accessory), "SetPlayer")]
-        public static bool SetPlayer(Player player)
+        // 무의미
+        //[HarmonyPrefix, HarmonyPatch(typeof(Player_Accessory), "SetPlayer")]
+        //public static bool SetPlayer(Player player)
+        //{
+        //    logger.LogInfo("SetPlayer");
+        //    Debug.Log("SetPlayer");
+        //    DungreedPlugin.player = player;
+        //    return true;
+        //}
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GameManager), "CreatePlayer")]
+        // public void CreatePlayer(bool with2P = true)
+        public static void CreatePlayer(bool with2P, Player ___currentPlayer)
         {
-            logger.LogInfo("SetPlayer");
-            DungreedPlugin.player = player;
-            return true;
+            logger.LogInfo($"CreatePlayer , {with2P}");
+            Debug.Log("CreatePlayer");
+            DungreedPlugin.player = ___currentPlayer;
+            status = player._creature.status;
+            ability = player._ability;
+            //return true;
         }
 
 
