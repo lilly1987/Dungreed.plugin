@@ -428,9 +428,13 @@ namespace Dungreed.plugin
             myItemDataCnt=myItemDataNames.Length;
         }
 
-        
 
-        [HarmonyPostfix, HarmonyPatch(typeof(ActiveSkill), "Use")]
+        /// <summary>
+        /// ActiveSkill 자체는 추상 클래스라서 패치 불가?
+        /// </summary>
+        /// <param name="__instance"></param>
+        /// <param name="use"></param>
+        //[HarmonyPostfix, HarmonyPatch(typeof(ActiveSkill), "Use" )]
         // public void Reload(bool beforeReload = false)
         public static void Use(ActiveSkill __instance, ref bool use)
         {
